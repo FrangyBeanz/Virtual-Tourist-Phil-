@@ -486,6 +486,7 @@
 				FA5F6E6A1CF63B09007A66CA /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 		FA5F6E6B1CF63B09007A66CA /* Build configuration list for PBXNativeTarget "Virtual Tourist, Phil!Tests" */ = {
 			isa = XCConfigurationList;
@@ -494,6 +495,7 @@
 				FA5F6E6D1CF63B09007A66CA /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 		FA5F6E6E1CF63B09007A66CA /* Build configuration list for PBXNativeTarget "Virtual Tourist, Phil!UITests" */ = {
 			isa = XCConfigurationList;
@@ -502,6 +504,7 @@
 				FA5F6E701CF63B09007A66CA /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
 

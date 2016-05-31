@@ -10,16 +10,23 @@
             <objects>
                 <viewController id="6Oj-vn-yBN" customClass="MapViewController" customModule="Virtual_Tourist__Phil_" customModuleProvider="target" sceneMemberID="viewController">
                     <mapView key="view" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" mapType="standard" id="xuU-8T-rtz">
-                        <rect key="frame" x="0.0" y="0.0" width="240" height="128"/>
+                        <rect key="frame" x="0.0" y="0.0" width="600" height="600"/>
                         <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+                        <gestureRecognizers/>
                     </mapView>
                     <connections>
                         <outlet property="MapView" destination="xuU-8T-rtz" id="WRV-sB-iUe"/>
+                        <outlet property="mapView" destination="xuU-8T-rtz" id="J9P-eD-UsE"/>
                     </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="5Rd-0s-16s" userLabel="First Responder" sceneMemberID="firstResponder"/>
+                <pongPressGestureRecognizer allowableMovement="10" minimumPressDuration="0.5" id="YRm-4W-7xI">
+                    <connections>
+                        <action selector="LongTouch:getstureRecognizer:" destination="6Oj-vn-yBN" id="48s-wv-GTi"/>
+                    </connections>
+                </pongPressGestureRecognizer>
             </objects>
-            <point key="canvasLocation" x="-1134" y="307"/>
+            <point key="canvasLocation" x="-1002" y="323"/>
         </scene>
     </scenes>
 </document>
