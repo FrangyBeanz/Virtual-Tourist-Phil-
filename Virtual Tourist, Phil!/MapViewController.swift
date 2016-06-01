@@ -10,10 +10,13 @@
 import UIKit
 import MapKit
 
-class MapViewController: UIViewController, MKMapViewDelegate {
+class MapViewController: UIViewController, MKMapViewDelegate, CLLocationManagerDelegate {
 
     var location: CLLocation!
     var LongPress = UILongPressGestureRecognizer.self
+    let locationManager = CLLocationManager()
+    var firstLoad = true
+
     @IBOutlet var mapView: MKMapView!
     
     override func viewDidLoad() {
@@ -21,12 +24,34 @@ class MapViewController: UIViewController, MKMapViewDelegate {
         // Do any additional setup after loading the view, typically from a nib.
         self.mapView.delegate = self
         
+        //Check for previous user saved pin locations, if found display them on the map at launch. If not, do nothing.
+        firstLoad = NSUserDefaults.standardUserDefaults().boolForKey("firstLoad")
+        print(firstLoad)
+        
+        // if let latitudeload = NSUserDefaults.standardUserDefaults().doubleForKey("locationDataLat")
+        
+      /*  {
+            let loadedLocation = location as? CLLocation {
+                print(loadedLocation.coordinate.latitude)
+                print(loadedLocation.coordinate.longitude)
+                let location = CLLocationCoordinate2D(
+                    latitude: loadedLocation.coordinate.latitude,
+                    longitude: loadedLocation.coordinate.longitude
+                )
+                let annotation = MKPointAnnotation()
+                annotation.coordinate = location
+                self.mapView.addAnnotation(annotation)
+
+            }
+        }*/
+        
         //Load the long press recogniser when the page loads
         let longPressRecogniser = UILongPressGestureRecognizer(target: self, action: #selector(MapViewController.handleLongPress(_:)))
             longPressRecogniser.minimumPressDuration = 1.5 //user must hold the press for 1.5 seconds for the pin to drop
             mapView.addGestureRecognizer(longPressRecogniser)
     }
     
+    //Detect a long press and add a pin to the map
     func handleLongPress(getstureRecognizer : UIGestureRecognizer){
         if getstureRecognizer.state != .Began { return }
         
@@ -39,32 +64,27 @@ class MapViewController: UIViewController, MKMapViewDelegate {
 
         // Add the Pin to the map
         annotation.coordinate = touchMapCoordinate
-        mapView.addAnnotation(annotation)
+        mapView.addAnnotation(annotation);
         print("I'm in handleLong")
+        
+        // Save the pin location
+        let location = CLLocationCoordinate2D(
+            latitude: annotation.coordinate.latitude,
+            longitude: annotation.coordinate.longitude
+        )
+
+        //let location = NSValue(MKCoordinate: touchMapCoordinate)
+        //let locationData = NSKeyedArchiver.archivedDataWithRootObject(location)
+       // NSUserDefaults.standardUserDefaults().setFloat(sliderView.value, forKey: SliderValueKey)
+        NSUserDefaults.standardUserDefaults().setBool(false, forKey: "firstLoad")
+        NSUserDefaults.standardUserDefaults().setDouble(Double(location.latitude), forKey: "locationDataLat");
+        NSUserDefaults.standardUserDefaults().setDouble(Double(location.longitude), forKey: "locationDataLong");
+        
+        print(annotation.coordinate.latitude);
+        print(annotation.coordinate.longitude)
     }
    
-    /*
-    func PinOptions(mapView: MKMapView, viewForAnnotation annotation: MKAnnotation) -> MKAnnotationView? {
-        print("I see your function, but i choose to ignore it!")
-        let reuseId = "pin"
-        var pinView = mapView.dequeueReusableAnnotationViewWithIdentifier(reuseId) as? MKPinAnnotationView
-        if pinView == nil {
-            pinView = MKPinAnnotationView(annotation: annotation, reuseIdentifier: reuseId)
-            pinView!.canShowCallout = true
-            pinView!.animatesDrop = true
-            pinView!.pinTintColor = UIColor.orangeColor()
-            pinView!.rightCalloutAccessoryView = UIButton(type: .DetailDisclosure)
-        }
-        else {
-            pinView!.annotation = annotation
-        }
-        return pinView
-    }
-    */
 
-    //TODO Drop pin
-       //Adding annotations
-    
     //TODO Save the Pins location in NS User Defaults
     
     //TODO when a pin is dropped, call the Flickr API and pass photos from API into a new view
