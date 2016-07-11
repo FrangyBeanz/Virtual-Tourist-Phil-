@@ -9,81 +9,99 @@
 
 import UIKit
 import MapKit
+import CoreData
 
 class MapViewController: UIViewController, MKMapViewDelegate, CLLocationManagerDelegate {
 
     var location: CLLocation!
     var LongPress = UILongPressGestureRecognizer.self
     let locationManager = CLLocationManager()
-    var firstLoad = true
+    var firstLoad = false
+    var longPressGestureRecognizerToAdd : UILongPressGestureRecognizer!
+    var mapViewDefaults:MapDefaults?
+    @NSManaged var latitude : NSNumber
+    @NSManaged var longitude : NSNumber
+    @NSManaged var page : Int
 
+    //Grab the managed object context leveraged from the Favorite Actors class
+    lazy var sharedContext : NSManagedObjectContext = {
+        return CoreDataStackManager.sharedInstance().managedObjectContext
+    }()
+    
     @IBOutlet var mapView: MKMapView!
+    
+    
+    func Pins() -> [Pin] {
+        let error: NSErrorPointer = nil
+        let fetchRequest = NSFetchRequest(entityName: "Pin")
+        let results: [AnyObject]?
+        do {
+            results = try sharedContext.executeFetchRequest(fetchRequest)
+        } catch let error1 as NSError {
+            error.memory = error1
+            results = nil
+        }
+        if error != nil {
+            print("Could not execute fetch request due to: \(error)")
+        }
+        return results as! [Pin]
+    }
+
     
     override func viewDidLoad() {
         super.viewDidLoad()
         // Do any additional setup after loading the view, typically from a nib.
         self.mapView.delegate = self
         
-        //Check for previous user saved pin locations, if found display them on the map at launch. If not, do nothing.
-        firstLoad = NSUserDefaults.standardUserDefaults().boolForKey("firstLoad")
-        print(firstLoad)
-        
-        // if let latitudeload = NSUserDefaults.standardUserDefaults().doubleForKey("locationDataLat")
-        
-      /*  {
-            let loadedLocation = location as? CLLocation {
-                print(loadedLocation.coordinate.latitude)
-                print(loadedLocation.coordinate.longitude)
-                let location = CLLocationCoordinate2D(
-                    latitude: loadedLocation.coordinate.latitude,
-                    longitude: loadedLocation.coordinate.longitude
-                )
-                let annotation = MKPointAnnotation()
-                annotation.coordinate = location
-                self.mapView.addAnnotation(annotation)
-
-            }
-        }*/
+        // Load the last saved location on the map
+        loadMapDefaults()
         
         //Load the long press recogniser when the page loads
         let longPressRecogniser = UILongPressGestureRecognizer(target: self, action: #selector(MapViewController.handleLongPress(_:)))
-            longPressRecogniser.minimumPressDuration = 1.5 //user must hold the press for 1.5 seconds for the pin to drop
+            longPressRecogniser.minimumPressDuration = 0.5 //user must hold the press for 1.5 seconds for the pin to drop
             mapView.addGestureRecognizer(longPressRecogniser)
+        
+        //Check for previous user saved pin locations, if found display them on the map at launch. If not, do nothing.
+        let pins = Pins()
+        if pins.isEmpty {
+            return
+        } else {
+            mapView.addAnnotations(pins)
+        }
     }
     
     //Detect a long press and add a pin to the map
     func handleLongPress(getstureRecognizer : UIGestureRecognizer){
-        if getstureRecognizer.state != .Began { return }
-        
+      
         let touchPoint = getstureRecognizer.locationInView(self.mapView)
         let touchMapCoordinate = mapView.convertPoint(touchPoint, toCoordinateFromView: mapView)
         
-        let annotation = MKPointAnnotation()
         
         //TODO - Animate the Pin Drop
 
-        // Add the Pin to the map
-        annotation.coordinate = touchMapCoordinate
-        mapView.addAnnotation(annotation);
-        print("I'm in handleLong")
-        
         // Save the pin location
-        let location = CLLocationCoordinate2D(
-            latitude: annotation.coordinate.latitude,
-            longitude: annotation.coordinate.longitude
-        )
+          if getstureRecognizer.state == UIGestureRecognizerState.Ended {
+            let dictionary = ["latitude": touchMapCoordinate.latitude, "longitude": touchMapCoordinate.longitude]
+            let pin = Pin(dictionary: dictionary, context: sharedContext)
+            CoreDataStackManager.sharedInstance().saveContext()
+            print("Location saved to dictionary!")
+            
+        // Add the new Pin to the map view
+            mapView.addAnnotation(pin)
+            print("Location added to the map!")
+        }
 
-        //let location = NSValue(MKCoordinate: touchMapCoordinate)
-        //let locationData = NSKeyedArchiver.archivedDataWithRootObject(location)
-       // NSUserDefaults.standardUserDefaults().setFloat(sliderView.value, forKey: SliderValueKey)
-        NSUserDefaults.standardUserDefaults().setBool(false, forKey: "firstLoad")
-        NSUserDefaults.standardUserDefaults().setDouble(Double(location.latitude), forKey: "locationDataLat");
-        NSUserDefaults.standardUserDefaults().setDouble(Double(location.longitude), forKey: "locationDataLong");
-        
-        print(annotation.coordinate.latitude);
-        print(annotation.coordinate.longitude)
     }
-   
+    
+    func setGestureRecognizers() {
+        gestureRecognizerTo()
+        longPressGestureRecognizerToAdd.enabled = true
+    }
+    func gestureRecognizerTo() {
+        longPressGestureRecognizerToAdd = UILongPressGestureRecognizer(target: self, action: #selector(MapViewController.handleLongPress(_:)))
+        longPressGestureRecognizerToAdd.minimumPressDuration = 0.5
+        mapView.addGestureRecognizer(longPressGestureRecognizerToAdd)
+    }
 
     //TODO Save the Pins location in NS User Defaults
     
@@ -94,11 +112,75 @@ class MapViewController: UIViewController, MKMapViewDelegate, CLLocationManagerD
     //User changes to selected photos should be loaded into Core Data
     
     
+    // The following code is leveraged from the On The Map Project. It determines how pins will be renered on the map.
+    func mapView(mapView: MKMapView, viewForAnnotation annotation: MKAnnotation) -> MKAnnotationView? {
+        
+        let reuseId = "Pin"
+        
+        var pinView = mapView.dequeueReusableAnnotationViewWithIdentifier(reuseId) as? MKPinAnnotationView
+        if pinView == nil {
+            pinView = MKPinAnnotationView(annotation: annotation, reuseIdentifier: reuseId)
+            pinView!.canShowCallout = false
+            pinView!.animatesDrop = true
+            pinView!.pinTintColor = UIColor.orangeColor()
+        }
+        else {
+            pinView!.annotation = annotation
+        }
+        
+        return pinView!
+    }
+    
+    
+    
     override func didReceiveMemoryWarning() {
         super.didReceiveMemoryWarning()
         // Dispose of any resources that can be recreated.
     }
 
+    // We need to detect any changes in region to store them
+    func mapView(mapView: MKMapView, regionDidChangeAnimated animated: Bool) {
+         saveMapDefaults()
+         print("New user default map region has been saved!")    }
+    
+    
+    // MARK - save and load map region
+    struct mapKeys {
+        static let cLat = "CenterLatitudeKey"
+        static let cLong = "CenterLongitude"
+        static let sLat = "SpanLatitudeDeltaKey"
+        static let sLong = "SpanLongitudeDeltaKey"
+    }
+    
+    
+    func saveMapDefaults() {
+        if mapViewDefaults == nil {
+            mapViewDefaults = MapDefaults(region: mapView.region, context: sharedContext)
+        } else {
+            mapViewDefaults!.region = mapView.region
+        }
+        CoreDataStackManager.sharedInstance().saveContext()
+    }
+    
+    func loadMapDefaults() {
+        let fetchRequest = NSFetchRequest(entityName: "MapDefaults")
+        var regions:[MapDefaults] = []
+        do {
+            let results = try sharedContext.executeFetchRequest(fetchRequest)
+            regions = results as! [MapDefaults]
+        } catch let error as NSError {
+            // only map region failed, so failing silent
+            print("An error occured accessing managed object context \(error.localizedDescription)")
+        }
+        if regions.count > 0 {
+            mapViewDefaults = regions[0]
+            mapView.region = mapViewDefaults!.region
+        } else {
+            mapViewDefaults = MapDefaults(region: mapView.region, context: sharedContext)
+        }
+    }
+    
+    
 
 }
 
