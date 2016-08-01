@@ -19,7 +19,12 @@ class MapViewController: UIViewController, MKMapViewDelegate, CLLocationManagerD
     let locationManager = CLLocationManager()
     let firstLoadString = "First Load String"
     var longPressGestureRecognizerToAdd : UILongPressGestureRecognizer!
+    
+    //Vars to capture context of pin add and pass to photo view controller
+    var pressedPin:Pin!
     var mapViewDefaults:MapDefaults?
+    
+    //non-volatile vars
     @NSManaged var latitude : NSNumber
     @NSManaged var longitude : NSNumber
     @NSManaged var page : Int
@@ -113,7 +118,13 @@ class MapViewController: UIViewController, MKMapViewDelegate, CLLocationManagerD
         // Add the new Pin to the map view
             mapView.addAnnotation(pin)
             print("Location added to the map!")
+            
+        // Open up the photo collection view
+            pressedPin = pin
+            loadPhotosView()
         }
+        
+        
 
     }
     
@@ -185,6 +196,19 @@ class MapViewController: UIViewController, MKMapViewDelegate, CLLocationManagerD
     
     
     //TODO when a pin is dropped, call the Flickr API and pass photos from API into a new view
+    
+    override func prepareForSegue(segue: UIStoryboardSegue, sender: AnyObject?) {
+        if (segue.identifier == "OpenPhotoCollection") {
+            mapView.deselectAnnotation(pressedPin, animated: false)
+            let Controller = segue.destinationViewController as! PhotoViewController
+            Controller.pin = pressedPin
+
+        }
+    }
+    
+    func loadPhotosView(){
+        performSegueWithIdentifier("OpenPhotoCollection", sender: self)
+        }
     
     //TODO photos should be selectable and removable
     
