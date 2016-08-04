@@ -16,9 +16,16 @@
                         <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
                         <gestureRecognizers/>
                     </mapView>
-                    <navigationItem key="navigationItem" title="Virtual Tourist" id="fvB-dd-5Pi"/>
+                    <navigationItem key="navigationItem" title="Virtual Tourist" id="fvB-dd-5Pi">
+                        <barButtonItem key="rightBarButtonItem" title="Edit" id="Hr7-c0-v6l">
+                            <connections>
+                                <action selector="pinEditAction:" destination="6Oj-vn-yBN" id="CYR-b6-iFa"/>
+                            </connections>
+                        </barButtonItem>
+                    </navigationItem>
                     <connections>
                         <outlet property="MapView" destination="xuU-8T-rtz" id="WRV-sB-iUe"/>
+                        <outlet property="editButton" destination="Hr7-c0-v6l" id="gcB-Dk-eIc"/>
                         <outlet property="mapView" destination="xuU-8T-rtz" id="J9P-eD-UsE"/>
                         <segue destination="BRd-yT-nMS" kind="show" identifier="OpenPhotoCollection" id="GRl-XL-drh"/>
                     </connections>

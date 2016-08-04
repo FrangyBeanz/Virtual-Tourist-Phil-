@@ -25,8 +25,9 @@ class PhotoViewController: UIViewController, MKMapViewDelegate, CLLocationManage
         
         //Add the selected Pin to the Map, but check we got it first!
         if pin == nil {
-            print("Failing Gracefully - for some reason I don't have a Pin")
+            print("for some reason I don't have a Pin!!")
         } else {
+        mapView.delegate = self
         mapView.addAnnotation(pin!)
         mapView.setCenterCoordinate(pin!.coordinate, animated: true)
             
@@ -34,8 +35,8 @@ class PhotoViewController: UIViewController, MKMapViewDelegate, CLLocationManage
         let span = MKCoordinateSpanMake(0.075, 0.075)
         let region = MKCoordinateRegion(center: pin!.coordinate, span: span)
         mapView.setRegion(region, animated: true)
-        mapView.delegate = self
-            
+        mapView.userInteractionEnabled = false
+
             }
     }
     
@@ -49,21 +50,19 @@ class PhotoViewController: UIViewController, MKMapViewDelegate, CLLocationManage
     }
     
     // The following code is leveraged from my "On The Map, Phil!" Project. It determines how pins will be renered on the map. "Make it pretty!"
-     func mapView(mapView: MKMapView, viewForAnnotation annotation: MKAnnotation) -> MKAnnotationView? {
+     func mapView (mapView: MKMapView, viewForAnnotation annotation: MKAnnotation) -> MKAnnotationView? {
         let reuseId = "Pin"
         var pinView = mapView.dequeueReusableAnnotationViewWithIdentifier(reuseId) as? MKPinAnnotationView
         if pinView == nil {
             pinView = MKPinAnnotationView(annotation: annotation, reuseIdentifier: reuseId)
             pinView!.canShowCallout = false
-            pinView!.animatesDrop = true
             pinView!.pinTintColor = UIColor.orangeColor()
         }
         else {
             pinView!.annotation = annotation
-            pinView!.animatesDrop = true
             pinView!.pinTintColor = UIColor.orangeColor()
         }
-        return pinView!
+        return pinView
     }
 
 }

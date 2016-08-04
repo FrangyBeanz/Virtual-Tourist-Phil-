@@ -16,6 +16,7 @@ class MapViewController: UIViewController, MKMapViewDelegate, CLLocationManagerD
 
     var location: CLLocation!
     var LongPress = UILongPressGestureRecognizer.self
+    var editPinMode = false
     let locationManager = CLLocationManager()
     let firstLoadString = "First Load String"
     var longPressGestureRecognizerToAdd : UILongPressGestureRecognizer!
@@ -33,8 +34,20 @@ class MapViewController: UIViewController, MKMapViewDelegate, CLLocationManagerD
     lazy var sharedContext : NSManagedObjectContext = {
         return CoreDataStackManager.sharedInstance().managedObjectContext
     }()
-    
     @IBOutlet var mapView: MKMapView!
+    @IBOutlet weak var editButton: UIBarButtonItem!
+    
+    //Editing toggle
+    @IBAction func pinEditAction(sender: AnyObject) {
+        if editPinMode == false {
+            editPinMode = true
+            editButton.title = "Finished Editing"
+        } else {
+            editPinMode = false
+            editButton.title = "Edit"
+            
+        }
+    }
     
     
     func Pins() -> [Pin] {
@@ -123,9 +136,35 @@ class MapViewController: UIViewController, MKMapViewDelegate, CLLocationManagerD
             pressedPin = pin
             loadPhotosView()
         }
-        
-        
-
+    }
+    
+    //When pressing an existing pin, need to also route it to the photo collection.
+   func mapView(mapView: MKMapView, didSelectAnnotationView view: MKAnnotationView) {
+        let annotation = view.annotation as! Pin
+        pressedPin = annotation
+        print("A Pin was Pressed!")
+        if editPinMode == false {
+            performSegueWithIdentifier("OpenPhotoCollection", sender: self)
+        } else {
+            //Present a confirmation to the user
+            let alert = UIAlertController(title: "Delete Pin", message: "Are you sure?", preferredStyle: .Alert)
+            alert.addAction(UIAlertAction(title: "On second thought...", style: .Default, handler: nil))
+            alert.addAction(UIAlertAction(title: "Do it!", style: .Default, handler: { (action: UIAlertAction) in
+                
+            //nullify the pressed pin from the view and call the function to ensure it is removed from core data
+                self.pressedPin = nil
+                self.pinDestruction(annotation)
+            }))
+            presentViewController(alert, animated: true, completion: nil)
+        }
+    }
+    
+    //If a pin was deleted, make sure we properly delete it from Core Data
+    func pinDestruction(pin: Pin) {
+        mapView.removeAnnotation(pin)
+        sharedContext.deleteObject(pin)
+        CoreDataStackManager.sharedInstance().saveContext()
+        print("Pin has been destroyed!")
     }
     
     // The following code is leveraged from my "On The Map, Phil!" Project. It determines how pins will be renered on the map.
