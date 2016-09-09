@@ -34,8 +34,10 @@ class MapViewController: UIViewController, MKMapViewDelegate, CLLocationManagerD
     lazy var sharedContext : NSManagedObjectContext = {
         return CoreDataStackManager.sharedInstance().managedObjectContext
     }()
-    @IBOutlet var mapView: MKMapView!
+    
+    
     @IBOutlet weak var editButton: UIBarButtonItem!
+    @IBOutlet var mapView: MKMapView!
     
     //Editing toggle
     @IBAction func pinEditAction(sender: AnyObject) {
@@ -45,11 +47,10 @@ class MapViewController: UIViewController, MKMapViewDelegate, CLLocationManagerD
         } else {
             editPinMode = false
             editButton.title = "Edit"
-            
         }
     }
     
-    
+    //Fetch the Pins we got from Core Data
     func Pins() -> [Pin] {
         let error: NSErrorPointer = nil
         let fetchRequest = NSFetchRequest(entityName: "Pin")
@@ -66,6 +67,11 @@ class MapViewController: UIViewController, MKMapViewDelegate, CLLocationManagerD
         return results as! [Pin]
     }
 
+    override func viewDidAppear(animated: Bool) {
+        //always ensure that editing mode is off when this view appears (not sure this is really needed, but i somehow managed to get it stuck in edit mode once, might remove it later)
+        editPinMode = false
+    }
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         // Do any additional setup after loading the view, typically from a nib.
@@ -164,7 +170,7 @@ class MapViewController: UIViewController, MKMapViewDelegate, CLLocationManagerD
         mapView.removeAnnotation(pin)
         sharedContext.deleteObject(pin)
         CoreDataStackManager.sharedInstance().saveContext()
-        print("Pin has been destroyed!")
+        print("A Pin has fallen in battle!")
     }
     
     // The following code is leveraged from my "On The Map, Phil!" Project. It determines how pins will be renered on the map.
@@ -192,7 +198,6 @@ class MapViewController: UIViewController, MKMapViewDelegate, CLLocationManagerD
     // We need to detect any changes in region to store them
     func mapView(mapView: MKMapView, regionDidChangeAnimated animated: Bool) {
          saveMapDefaults()
-         print("New user default map region has been saved!")
     }
     
     
@@ -208,16 +213,18 @@ class MapViewController: UIViewController, MKMapViewDelegate, CLLocationManagerD
     func saveMapDefaults() {
         if mapViewDefaults == nil {
             mapViewDefaults = MapDefaults(region: mapView.region, context: sharedContext)
+            print("")
         } else {
             mapViewDefaults!.region = mapView.region
         }
         CoreDataStackManager.sharedInstance().saveContext()
+        print("New user default map region has been saved!")
     }
     
     //function to allow loading of the map region that was saved during the last app session in core data. Called on view load.
     func loadMapDefaults() {
         let fetchRequest = NSFetchRequest(entityName: "MapDefaults")
-        var regions:[MapDefaults] = []
+      var regions:[MapDefaults] = []
         do {
             let results = try sharedContext.executeFetchRequest(fetchRequest)
             regions = results as! [MapDefaults]
@@ -228,9 +235,11 @@ class MapViewController: UIViewController, MKMapViewDelegate, CLLocationManagerD
         if regions.count > 0 {
             mapViewDefaults = regions[0]
             mapView.region = mapViewDefaults!.region
+            print("Using default rather than last known user location")
         } else {
             mapViewDefaults = MapDefaults(region: mapView.region, context: sharedContext)
-        }
+            print("Last known user region has been applied to the map")
+       }
     }
     
     
@@ -241,6 +250,9 @@ class MapViewController: UIViewController, MKMapViewDelegate, CLLocationManagerD
             mapView.deselectAnnotation(pressedPin, animated: false)
             let Controller = segue.destinationViewController as! PhotoViewController
             Controller.pin = pressedPin
+            let backItem = UIBarButtonItem()
+            backItem.title = "Back"
+            navigationItem.backBarButtonItem = backItem
 
         }
     }

@@ -27,7 +27,6 @@ class MapDefaults: NSManagedObject {
         //Core Data
         let entity = NSEntityDescription.entityForName("MapDefaults", inManagedObjectContext: context)!
         super.init(entity: entity, insertIntoManagedObjectContext: context)
-        
         self.region = region
     }
     
@@ -39,8 +38,8 @@ class MapDefaults: NSManagedObject {
             sLong = newValue.span.longitudeDelta
         }
         get {
-            let center = CLLocationCoordinate2DMake(cLat, cLong)
-            let span = MKCoordinateSpanMake(sLat, sLong)
+            let center = CLLocationCoordinate2DMake(cLat, cLong); print("Got coordinates")
+            let span = MKCoordinateSpanMake(sLat, sLong); print("Got Spans")
             return MKCoordinateRegionMake(center, span)
         }
     }

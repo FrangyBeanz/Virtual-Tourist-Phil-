@@ -12,7 +12,7 @@
         <attribute name="page" optional="YES" attributeType="Integer 64" defaultValueString="0" syncable="YES"/>
     </entity>
     <elements>
-        <element name="Pin" positionX="-54" positionY="-9" width="128" height="90"/>
         <element name="MapDefaults" positionX="-54" positionY="18" width="128" height="105"/>
+        <element name="Pin" positionX="-54" positionY="-9" width="128" height="90"/>
     </elements>
 </model>
