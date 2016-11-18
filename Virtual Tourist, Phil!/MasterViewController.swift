@@ -14,9 +14,13 @@ import MapKit
 
 class MasterViewController: UIViewController {
     
+    //--------------------------------------------------------------------------------------------------------
+    // MARK: - Variables, Outlets and Constants
+    //--------------------------------------------------------------------------------------------------------
+    
     let pinFinishedDownloadingNotification = "pinFinishedDownloadNotification"
     
-    //MARK: Download Photo Set
+    //Download Photo Set
     func getPhotosForPin(pin: Pin, completionHandler: (success: Bool, errorString: String?) -> Void) {
         if (pin.isDownloading) {
             return
@@ -31,8 +35,9 @@ class MasterViewController: UIViewController {
         }
     }
     
-    //MARK: Modal alerts
-    //A re-usable function to display a modal alert message
+    //--------------------------------------------------------------------------------------------------------
+    // MARK: - Modal Alert
+    //--------------------------------------------------------------------------------------------------------
     func showAlert(title: String, message: String, buttonText: String = "Ok") {
         let alert = UIAlertController(title: title, message: message, preferredStyle: UIAlertControllerStyle.Alert)
         alert.addAction(UIAlertAction(title: buttonText, style: UIAlertActionStyle.Default, handler: nil))
@@ -40,14 +45,19 @@ class MasterViewController: UIViewController {
         self.presentViewController(alert, animated: true, completion: nil)
     }
     
+    //--------------------------------------------------------------------------------------------------------
     //MARK: Core Data
+    //--------------------------------------------------------------------------------------------------------
+
     var sharedContext: NSManagedObjectContext {
         return CoreDataStackManager.sharedInstance().managedObjectContext
     }
     
+    //--------------------------------------------------------------------------------------------------------
     //MARK: Map Pin Formatting
-    
+    //--------------------------------------------------------------------------------------------------------
     // The following code is leveraged from my "On The Map, Phil!" Project. It determines how pins will be renered on the map.
+    
     func mapView(mapView: MKMapView, viewForAnnotation annotation: MKAnnotation) -> MKAnnotationView? {
         let reuseId = "Pin"
         var pinView = mapView.dequeueReusableAnnotationViewWithIdentifier(reuseId) as? MKPinAnnotationView

@@ -10,25 +10,31 @@ import Foundation
 import CoreData
 import UIKit
 
+//Reference the Photo object from the data model
 @objc(Photo)
 
 class Photo: NSManagedObject {
+    
+    //--------------------------------------------------------------------------------------------------------
+    // MARK: - Variables, Outlets and Constants
+    //--------------------------------------------------------------------------------------------------------
     
     @NSManaged var photoURL: String
     @NSManaged var imagePath: String?
     @NSManaged var pin: Pin
     
     override init(entity: NSEntityDescription, insertIntoManagedObjectContext context: NSManagedObjectContext?) {
-        
         super.init(entity: entity, insertIntoManagedObjectContext: context)
     }
     
     init(photoURL: String, pin: Pin, context: NSManagedObjectContext) {
         
-        //Core Data
+        //--------------------------------------------------------------------------------------------------------
+        // MARK: - Photo Database Record - Core Data
+        //--------------------------------------------------------------------------------------------------------
+        
         let entity = NSEntityDescription.entityForName("Photo", inManagedObjectContext: context)!
         super.init(entity: entity, insertIntoManagedObjectContext: context)
-        
         self.photoURL = photoURL
         self.pin = pin
     }
@@ -49,7 +55,11 @@ class Photo: NSManagedObject {
         return fileURL!
     }
     
-    // Remove the data from the core data database when a pin is actually deleted so that we don;t just remove it from the view
+    //--------------------------------------------------------------------------------------------------------
+    // MARK: - Photo Deletion
+    //--------------------------------------------------------------------------------------------------------
+    // Remove the data from the core data database when a pin is actually deleted so that we don't just remove it from the view
+    
     override func prepareForDeletion() {
         if (imagePath == nil) {
             return

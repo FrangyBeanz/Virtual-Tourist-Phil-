@@ -116,9 +116,9 @@
 		FA1725111D08A96A003006D8 /* View */ = {
 			isa = PBXGroup;
 			children = (
+				FAA14F051D82AFC300F5C4D9 /* PhotoCollectionViewCell.swift */,
 				FA5F6E4C1CF63B09007A66CA /* LaunchScreen.storyboard */,
 				FA5F6E441CF63B09007A66CA /* Main.storyboard */,
-				FAA14F051D82AFC300F5C4D9 /* PhotoCollectionViewCell.swift */,
 			);
 			name = View;
 			sourceTree = "<group>";

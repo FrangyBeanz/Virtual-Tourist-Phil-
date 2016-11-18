@@ -6,24 +6,29 @@
 //  Copyright © 2016 Phillip Hughes. All rights reserved.
 //
 
-
-
 import UIKit
 import MapKit
 import CoreData
 
-//Reference the object from the data model
+//Reference the Pin object from the data model
 @objc(Pin)
 
 class Pin: NSManagedObject, MKAnnotation {
+    
+    //--------------------------------------------------------------------------------------------------------
+    // MARK: - Variables, Outlets and Constants
+    //--------------------------------------------------------------------------------------------------------
     
     @NSManaged var latitude: Double
     @NSManaged var longitude: Double
     @NSManaged var numPages: NSNumber?
     @NSManaged var photos:[Photo]
-    
     var isDownloading = false
     
+    //--------------------------------------------------------------------------------------------------------
+    // MARK: - Pin Coordinates - Core Data
+    //--------------------------------------------------------------------------------------------------------
+
     override init(entity: NSEntityDescription, insertIntoManagedObjectContext context: NSManagedObjectContext?) {
         super.init(entity: entity, insertIntoManagedObjectContext: context)
     }
