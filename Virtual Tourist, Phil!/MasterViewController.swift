@@ -10,6 +10,7 @@
 
 import UIKit
 import CoreData
+import MapKit
 
 class MasterViewController: UIViewController {
     
@@ -42,5 +43,23 @@ class MasterViewController: UIViewController {
     //MARK: Core Data
     var sharedContext: NSManagedObjectContext {
         return CoreDataStackManager.sharedInstance().managedObjectContext
+    }
+    
+    //MARK: Map Pin Formatting
+    
+    // The following code is leveraged from my "On The Map, Phil!" Project. It determines how pins will be renered on the map.
+    func mapView(mapView: MKMapView, viewForAnnotation annotation: MKAnnotation) -> MKAnnotationView? {
+        let reuseId = "Pin"
+        var pinView = mapView.dequeueReusableAnnotationViewWithIdentifier(reuseId) as? MKPinAnnotationView
+        if pinView == nil {
+            pinView = MKPinAnnotationView(annotation: annotation, reuseIdentifier: reuseId)
+            pinView!.canShowCallout = false
+            pinView!.animatesDrop = true
+            pinView!.pinTintColor = UIColor.orangeColor()
+        }
+        else {
+            pinView!.annotation = annotation
+        }
+        return pinView!
     }
 }

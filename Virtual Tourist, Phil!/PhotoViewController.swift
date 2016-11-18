@@ -103,30 +103,7 @@ class PhotoViewController: MasterViewController, UICollectionViewDataSource, UIC
         NSNotificationCenter.defaultCenter().addObserver(self, selector: #selector(PhotoViewController.pinFinishedDownload), name: pinFinishedDownloadingNotification, object: nil)
         }
     }
-    
-    // The following code is leveraged from my "On The Map, Phil!" Project. It determines how pins will be rendered on the map. "Make it pretty!"
-    func mapView (mapView: MKMapView, viewForAnnotation annotation: MKAnnotation) -> MKAnnotationView? {
-        let reuseId = "Pin"
-        var pinView = mapView.dequeueReusableAnnotationViewWithIdentifier(reuseId) as? MKPinAnnotationView
-        if pinView == nil {
-            pinView = MKPinAnnotationView(annotation: annotation, reuseIdentifier: reuseId)
-            pinView!.canShowCallout = false
-            pinView!.pinTintColor = UIColor.orangeColor()
-            print("I see it but i ignore it A")
-        }
-        else {
-            pinView!.annotation = annotation
-            pinView!.pinTintColor = UIColor.orangeColor()
-            print("I see it but i ignore it B")
 
-        }
-        return pinView
-    }
-    
-    
-    override func didReceiveMemoryWarning() {
-        // Dispose of any resources that can be recreated.
-    }
     
     func loadNewCollectionSet() {
         for photo in fetchedResultsController.fetchedObjects as! [Photo] {

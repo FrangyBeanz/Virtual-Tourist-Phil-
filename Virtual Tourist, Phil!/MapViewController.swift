@@ -25,6 +25,7 @@ class MapViewController: MasterViewController, MKMapViewDelegate {
     var lastAddedPin:Pin? = nil
     var editPinMode = false
     var mapViewRegion:MapDefaults?
+    let firstLoadString = "First Load String"
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -34,26 +35,21 @@ class MapViewController: MasterViewController, MKMapViewDelegate {
         longPress.minimumPressDuration = 1.0
         mapView.addGestureRecognizer(longPress)
         
-        loadMapRegion()
-        mapView.addAnnotations(fetchAllPins())
-    }
-    
-    // The following code is leveraged from my "On The Map, Phil!" Project. It determines how pins will be renered on the map.
-    func mapView(mapView: MKMapView, viewForAnnotation annotation: MKAnnotation) -> MKAnnotationView? {
-        let reuseId = "Pin"
-        var pinView = mapView.dequeueReusableAnnotationViewWithIdentifier(reuseId) as? MKPinAnnotationView
-        if pinView == nil {
-            pinView = MKPinAnnotationView(annotation: annotation, reuseIdentifier: reuseId)
-            pinView!.canShowCallout = false
-            pinView!.animatesDrop = true
-            pinView!.pinTintColor = UIColor.orangeColor()
+        //Check to see if this is the first time running the App. No need to attempt to load core data if so. 
+        if NSUserDefaults.standardUserDefaults().boolForKey("First Load String") == false
+        {
+            // This was the first time loading the app, so need to record that this first load was successful so that we will attempt to load core data in future app loads
+            NSUserDefaults.standardUserDefaults().setBool(true, forKey: firstLoadString)
+            print("This is the first load! Will not attempt to load any defaults from core data")
         }
-        else {
-            pinView!.annotation = annotation
+        else
+        {
+            print("This is not the first load, proceed to load core data")
+            loadMapRegion()
+            mapView.addAnnotations(fetchAllPins())
         }
-        return pinView!
     }
-    
+
     // MARK: - Core Data implementation
     
     func fetchAllPins() -> [Pin] {
