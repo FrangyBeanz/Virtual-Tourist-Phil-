@@ -4,9 +4,8 @@
 //
 //  Created by Phillip Hughes on 10/08/2016.
 //  Copyright © 2016 Phillip Hughes. All rights reserved.
-//  Code referenced from my third project, "On the Map, Phil!"
-//  Reference from Julia Will GitHub Repo's and previous "On The Map".
-//  https://github.com/mileandra/udacity-virtual-tourist/tree/master/Virtual%20Tourist
+//  Code leveraged from third project, "On the Map, Phil!"
+//  Flickr API Documentation: https://www.flickr.com/services/api/
 
 import Foundation
 
@@ -43,23 +42,29 @@ class FlickrClient: NSObject {
         //4. Make the request
         let task = session.dataTaskWithRequest(request) { (data, response, error) in
             
-            /* GUARD: Was there an error? */
+            //GUARD: Was there an error?
             guard (error == nil) else {
                 print("There was an error with your request: \(error)")
                 completionHandler(result: nil, error: NSError(domain: "getTask", code: 2, userInfo: nil))
                 return
             }
             
-            /* GUARD: Did we get a successful 2XX response? */
-            guard let statusCode = (response as? NSHTTPURLResponse)?.statusCode where statusCode >= 200 && statusCode <= 299 else {
-                var errorCode = 0 /* technical error */
+            /* GUARD: Did we get a response with status code?
+             Reference: http://www.ietf.org/rfc/rfc2616.txt
+             | "200"  ; Section 10.2.1: OK
+             | "201"  ; Section 10.2.2: Created
+             | "202"  ; Section 10.2.3: Accepted
+             | "203"  ; Section 10.2.4: Non-Authoritative Information
+             | "204"  ; Section 10.2.5: No Content
+             | "205"  ; Section 10.2.6: Reset Content
+             | "206"  ; Section 10.2.7: Partial Content
+             */
+            
+            guard let statusCode = (response as? NSHTTPURLResponse)?.statusCode where statusCode >= 200 && statusCode <= 206 else {
+                var errorCode = 0
                 if let response = response as? NSHTTPURLResponse {
-                    print("Your request returned an invalid response! Status code: \(response.statusCode)!")
+                    print("Bad HTTP Response! Code: \(response.statusCode)!")
                     errorCode = response.statusCode
-                } else if let response = response {
-                    print("Your request returned an invalid response! Response: \(response)!")
-                } else {
-                    print("Your request returned an invalid response!")
                 }
                 dispatch_async(dispatch_get_main_queue(), {
                     completionHandler(result: nil, error: NSError(domain: "getTask", code: errorCode, userInfo: nil))
@@ -67,25 +72,23 @@ class FlickrClient: NSObject {
                 return
             }
             
-            /* GUARD: Was there any data returned? */
+            // GUARD: Was data returned?
             guard let data = data else {
                 print("No data was returned by the request!")
                 completionHandler(result: nil, error: NSError(domain: "getTask", code: 3, userInfo: nil))
                 return
             }
             
-            /* 5/6. Parse the data and use the data (happens in completion handler) */
+            // 5/6. Parse the data and use the data (happens in completion handler)
             if parseJSON {
                 FlickrClient.parseJSONWithCompletionHandler(data, completionHandler: completionHandler)
             } else {
                 completionHandler(result: data, error: nil)
             }
-            
         }
         
-        /* 7. Start the request */
+        // 7. Start the request
         task.resume()
-        
         return task
     }
     

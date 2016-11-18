@@ -102,11 +102,11 @@
 		FA1725101D08A95F003006D8 /* Model */ = {
 			isa = PBXGroup;
 			children = (
+				FA377EE91D0ABA9900079889 /* Virtual_Tourist__Phil_.xcdatamodeld */,
 				FA76E12C1D5BAE530008BD51 /* Flickr */,
 				FA5F6E401CF63B09007A66CA /* AppDelegate.swift */,
-				FAB030AF1D34374E009E2B3C /* MapDefaults.swift */,
-				FA377EE91D0ABA9900079889 /* Virtual_Tourist__Phil_.xcdatamodeld */,
 				FA377EE21D08B1CC00079889 /* CoreDataStackManager.swift */,
+				FAB030AF1D34374E009E2B3C /* MapDefaults.swift */,
 				FA377EE41D08B28E00079889 /* Pin.swift */,
 				FAA14F071D82B13800F5C4D9 /* Photo.swift */,
 			);

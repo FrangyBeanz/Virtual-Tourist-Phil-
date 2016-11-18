@@ -15,7 +15,7 @@ import CoreLocation
 class AppDelegate: UIResponder, UIApplicationDelegate {
     
     //--------------------------------------------------------------------------------------------------------
-    // MARK: - Variab;es
+    // MARK: - Variables
     //--------------------------------------------------------------------------------------------------------
 
     var window: UIWindow?

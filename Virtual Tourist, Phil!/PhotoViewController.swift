@@ -28,7 +28,7 @@ class PhotoViewController: MasterViewController, UICollectionViewDataSource, UIC
     var pin:Pin!
     var allPhotosLoaded = false
     var noPhotosLoaded = true
-    
+
     // store updated indexes
     var selectedIndexes   = [NSIndexPath]()
     var insertedIndexPaths: [NSIndexPath]!

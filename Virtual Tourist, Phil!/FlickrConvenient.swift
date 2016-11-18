@@ -4,15 +4,17 @@
 //
 //  Created by Phillip Hughes on 10/08/2016.
 //  Copyright © 2016 Phillip Hughes. All rights reserved.
-//  Reference from Julia Will and Spirosrap GitHub Repo's and previous "On The Map". 
-//  https://github.com/mileandra/udacity-virtual-tourist/tree/master/Virtual%20Tourist
-//  https://github.com/spirosrap/On-The-Map/blob/master/On%20The%20Map/UdacityConvenience.swift
+//  Adapted from previous project "On The Map".
+//  Flickr API Documentation: https://www.flickr.com/services/api/
 
 import Foundation
 import CoreData
 
 extension FlickrClient {
     
+    //--------------------------------------------------------------------------------------------------------
+    // MARK: - Variables, Outlets and Constants
+    //--------------------------------------------------------------------------------------------------------
     
     func getPhotosForPin(pin: Pin, completionHandler: (success: Bool, errorString: String?) -> Void) {
         
@@ -44,15 +46,19 @@ extension FlickrClient {
             ParameterKeys.SORT: sortBy
         ]
         
+        //--------------------------------------------------------------------------------------------------------
+        // MARK: - GET Method to assign result photos from Flickr API search to dictionary
+        //--------------------------------------------------------------------------------------------------------
+        
         taskForGETMethod(nil, parameters: parameters as? [String : AnyObject], parseJSON: true) { (JSONResult, error) in
             if let error = error {
                 var errorMessage = ""
                 switch error.code {
                 case 2:
-                    errorMessage = "Network connection lost"
+                    errorMessage = "No Network Connection"
                     break
                 default:
-                    errorMessage = "A technical error occured while fetching photos"
+                    errorMessage = "An error occured while fetching photos"
                     break
                 }
                 completionHandler(success: false, errorString: errorMessage)
@@ -116,13 +122,17 @@ extension FlickrClient {
         }
     }
     
+    //--------------------------------------------------------------------------------------------------------
+    // MARK: - Bounding Box Creation
+    //--------------------------------------------------------------------------------------------------------
+    
     func createBoundingBoxString(pin: Pin) -> String {
+        
+        //"Geo queries require some sort of limiting agent in order to prevent the database from crying. This is basically like the check against "parameterless searches" for queries without a geo component."
+        //  Although the Flickr API documentation implies bbox is optional, it seems that it doesn't always return results properly unless this is specified. Long & Lat values set to max.
         
         let latitude = pin.coordinate.latitude
         let longitude = pin.coordinate.longitude
-        
-        //"Geo queries require some sort of limiting agent in order to prevent the database from crying. This is basically like the check against "parameterless searches" for queries without a geo component."
-        //  Although the Flickr API documentation implies bbox is optional, it seems that it doesn't always return results properly unless this is specified. Long & Lat values set to max.        
         let bottom_left_lon = max(longitude - BBoxParameters.BOUNDING_BOX_HALF_WIDTH, BBoxParameters.LON_MIN)
         let bottom_left_lat = max(latitude - BBoxParameters.BOUNDING_BOX_HALF_HEIGHT, BBoxParameters.LAT_MIN)
         let top_right_lon = min(longitude + BBoxParameters.BOUNDING_BOX_HALF_HEIGHT, BBoxParameters.LON_MAX)

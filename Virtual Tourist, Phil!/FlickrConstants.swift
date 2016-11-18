@@ -5,6 +5,7 @@
 //  Created by Phillip Hughes on 10/08/2016.
 //  Copyright © 2016 Phillip Hughes. All rights reserved.
 //  Brief Description: defines constants required for interation with the Flickr API
+//  Flicker API Documentation: https://www.flickr.com/services/api/
 
 import Foundation
 

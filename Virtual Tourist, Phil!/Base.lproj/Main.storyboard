@@ -7,10 +7,10 @@
         <capability name="Constraints to layout margins" minToolsVersion="6.0"/>
     </dependencies>
     <scenes>
-        <!--Virtual Tourist-->
+        <!--Virtual Tourist Map-->
         <scene sceneID="UNX-2C-k7b">
             <objects>
-                <viewController storyboardIdentifier="MapViewController" id="6Oj-vn-yBN" customClass="MapViewController" customModule="Virtual_Tourist__Phil_" customModuleProvider="target" sceneMemberID="viewController">
+                <viewController storyboardIdentifier="MapViewController" title="Virtual Tourist Map" id="6Oj-vn-yBN" userLabel="Virtual Tourist Map" customClass="MapViewController" customModule="Virtual_Tourist__Phil_" customModuleProvider="target" sceneMemberID="viewController">
                     <layoutGuides>
                         <viewControllerLayoutGuide type="top" id="ZTW-m7-Stq"/>
                         <viewControllerLayoutGuide type="bottom" id="5kG-df-9cq"/>
