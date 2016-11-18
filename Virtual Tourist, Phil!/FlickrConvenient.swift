@@ -21,14 +21,14 @@ extension FlickrClient {
         
         if let numPages = pin.numPages {
             var numPagesInt = numPages as Int
-            // We might only access the first 4000 images returned by a search, so limit the results
-            if numPagesInt > 190 {
-                numPagesInt = 190
+                // Flickr Caps at 250 pages, ensure we don't return too many
+            if numPagesInt > 200 {
+                numPagesInt = 200
             }
             pageNumber = Int((arc4random_uniform(UInt32(numPagesInt)))) + 1
-            print("Getting photos for page number \(pageNumber) in \(numPages) total pages")
+            print("Downloading photos for these coordinates...")
         }
-        // Shuffle Sort to get more random images
+        // Shuffly the sorts to  ensure random results
         let possibleSorts = ["date-posted-desc", "date-posted-asc", "date-taken-desc", "date-taken-asc", "interstingness-desc", "interestingness-asc"]
         let sortBy = possibleSorts[Int((arc4random_uniform(UInt32(possibleSorts.count))))]
         
@@ -107,6 +107,7 @@ extension FlickrClient {
                         
                         photo.imagePath = fileURL.path
                         completionHandler(success: true, errorString: nil)
+                       
                     })
                 } else {
                     completionHandler(success: false, errorString: "Unable to download Photo")
@@ -120,16 +121,18 @@ extension FlickrClient {
         let latitude = pin.coordinate.latitude
         let longitude = pin.coordinate.longitude
         
-        /* Fix added to ensure box is bounded by minimum and maximums */
+        //"Geo queries require some sort of limiting agent in order to prevent the database from crying. This is basically like the check against "parameterless searches" for queries without a geo component."
+        //  Although the Flickr API documentation implies bbox is optional, it seems that it doesn't always return results properly unless this is specified. Long & Lat values set to max.        
         let bottom_left_lon = max(longitude - BBoxParameters.BOUNDING_BOX_HALF_WIDTH, BBoxParameters.LON_MIN)
         let bottom_left_lat = max(latitude - BBoxParameters.BOUNDING_BOX_HALF_HEIGHT, BBoxParameters.LAT_MIN)
         let top_right_lon = min(longitude + BBoxParameters.BOUNDING_BOX_HALF_HEIGHT, BBoxParameters.LON_MAX)
         let top_right_lat = min(latitude + BBoxParameters.BOUNDING_BOX_HALF_HEIGHT, BBoxParameters.LAT_MAX)
-        
         return "\(bottom_left_lon),\(bottom_left_lat),\(top_right_lon),\(top_right_lat)"
     }
     
     var sharedContext: NSManagedObjectContext {
+        print("Image cached!")
         return CoreDataStackManager.sharedInstance().managedObjectContext
+
     }
 }

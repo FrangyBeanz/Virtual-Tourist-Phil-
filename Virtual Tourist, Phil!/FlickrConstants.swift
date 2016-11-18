@@ -4,11 +4,7 @@
 //
 //  Created by Phillip Hughes on 10/08/2016.
 //  Copyright © 2016 Phillip Hughes. All rights reserved.
-////  Some code leveraged from my third project, "On the Map, Phil!"
-//  Reference from Julia Will and Spirosrap GitHub Repo's and previous "On The Map".
-//  https://github.com/mileandra/udacity-virtual-tourist/tree/master/Virtual%20Tourist
-//  https://github.com/spirosrap/On-The-Map/blob/master/On%20The%20Map/UdacityConvenience.swift
-
+//  Brief Description: defines constants required for interation with the Flickr API
 
 import Foundation
 
@@ -27,6 +23,7 @@ extension FlickrClient {
     //--------------------------------------------------------------------------------------------------------
     // MARK: - API Methods
     //--------------------------------------------------------------------------------------------------------
+    // Flickr Photos Search https://www.flickr.com/services/api/flickr.photos.search.html
     
     struct Methods {
         static let SEARCH = "flickr.photos.search"
@@ -35,6 +32,7 @@ extension FlickrClient {
     //--------------------------------------------------------------------------------------------------------
     // MARK: - API Keys & Values
     //--------------------------------------------------------------------------------------------------------
+    // Flickr API Arguments https://www.flickr.com/services/api/flickr.photos.search.html
     
     struct ParameterKeys {
         static let API_KEY          = "api_key"
@@ -57,6 +55,8 @@ extension FlickrClient {
     //--------------------------------------------------------------------------------------------------------
     // MARK: - Bounding Box Settings
     //--------------------------------------------------------------------------------------------------------
+    //"Geo queries require some sort of limiting agent in order to prevent the database from crying. This is basically like the check against "parameterless searches" for queries without a geo component."
+    //  Although the Flickr API documentation implies bbox is optional, it seems that it doesn't always return results properly unless this is specified. Long & Lat values set to max.
     
     struct BBoxParameters {
         static let BOUNDING_BOX_HALF_WIDTH = 1.0

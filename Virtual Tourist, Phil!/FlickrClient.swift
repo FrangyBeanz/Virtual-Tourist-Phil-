@@ -5,9 +5,8 @@
 //  Created by Phillip Hughes on 10/08/2016.
 //  Copyright © 2016 Phillip Hughes. All rights reserved.
 //  Code referenced from my third project, "On the Map, Phil!"
-//  Reference from Julia Will and Spirosrap GitHub Repo's and previous "On The Map".
+//  Reference from Julia Will GitHub Repo's and previous "On The Map".
 //  https://github.com/mileandra/udacity-virtual-tourist/tree/master/Virtual%20Tourist
-//  https://github.com/spirosrap/On-The-Map/blob/master/On%20The%20Map/UdacityConvenience.swift
 
 import Foundation
 
@@ -41,7 +40,7 @@ class FlickrClient: NSObject {
         let url = NSURL(string: urlString!)!
         let request = NSURLRequest(URL: url)
         
-        /* 4. Make the request */
+        //4. Make the request
         let task = session.dataTaskWithRequest(request) { (data, response, error) in
             
             /* GUARD: Was there an error? */

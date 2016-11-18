@@ -57,14 +57,14 @@
                         </variation>
                     </view>
                     <navigationItem key="navigationItem" title="Virtual Tourist" id="fvB-dd-5Pi">
-                        <barButtonItem key="rightBarButtonItem" title="Delete Pins" id="Hr7-c0-v6l">
+                        <barButtonItem key="rightBarButtonItem" title="Delete Pins" id="Hr7-c0-v6l" userLabel="Delete Button">
                             <connections>
-                                <action selector="pinEditAction:" destination="6Oj-vn-yBN" id="2oh-tN-XLx"/>
+                                <action selector="pinDeletion:" destination="6Oj-vn-yBN" id="etq-42-XrT"/>
                             </connections>
                         </barButtonItem>
                     </navigationItem>
                     <connections>
-                        <outlet property="editButton" destination="Hr7-c0-v6l" id="SMa-MG-jAW"/>
+                        <outlet property="deleteButton" destination="Hr7-c0-v6l" id="gxE-nP-j2t"/>
                         <outlet property="mapView" destination="e0X-Uu-Fn4" id="rYT-bm-8DH"/>
                         <segue destination="BRd-yT-nMS" kind="showDetail" identifier="OpenPhotoCollection" action="showViewController:sender:" id="GRl-XL-drh"/>
                     </connections>

@@ -18,12 +18,12 @@ class MapViewController: MasterViewController, MKMapViewDelegate {
     //--------------------------------------------------------------------------------------------------------
     
     @IBOutlet weak var mapView: MKMapView!
-    @IBOutlet weak var editButton: UIBarButtonItem!
+    @IBOutlet weak var deleteButton: UIBarButtonItem!
     let firstLoadString = "First Load String"
     var selectedPin:Pin!
-    var lastAddedPin:Pin? = nil
-    var editPinMode = false
-    var mapViewRegion:MapDefaults?
+    var latestPin:Pin? = nil
+    var mapViewDefaults:MapDefaults?
+    var deletePinMode = false
     
     //--------------------------------------------------------------------------------------------------------
     // MARK: - View Load
@@ -51,12 +51,12 @@ class MapViewController: MasterViewController, MKMapViewDelegate {
         else
         {
             print("This is not the first load, proceed to load core data")
-            loadMapRegion()
+            loadMapDefaults()
             mapView.addAnnotations(fetchAllPins())
         }
     }
     //--------------------------------------------------------------------------------------------------------
-    // MARK: - Core Data implementation
+    // MARK: - Fetch Pin Core Data
     //--------------------------------------------------------------------------------------------------------
     
     func fetchAllPins() -> [Pin] {
@@ -66,16 +66,15 @@ class MapViewController: MasterViewController, MKMapViewDelegate {
             let results = try sharedContext.executeFetchRequest(fetchRequest)
             pins = results as! [Pin]
         } catch let error as NSError {
-            showAlert("Uh-oh", message: "Something went wrong when trying to load existing data")
-            print("An error occured accessing managed object context \(error.localizedDescription)")
+            showAlert("Error", message: "Unable to load your data. Details: \(error.localizedDescription)")
         }
         return pins
     }
     //--------------------------------------------------------------------------------------------------------
     // MARK: - Adding, removing and editing Pins
     //---------------------------------------------------------------------------------------------------------
-    
     // References:
+    // Gesture Recogniser: https://guides.codepath.com/ios/Using-Gesture-Recognizers
     // Pin drop on long touch reference: http://stackoverflow.com/questions/3959994/how-to-add-a-push-pin-to-a-mkmapviewios-when-touching
 
     func addPin(gestureRecognizer: UIGestureRecognizer) {
@@ -83,116 +82,119 @@ class MapViewController: MasterViewController, MKMapViewDelegate {
         let locationInMap = gestureRecognizer.locationInView(mapView)
         let coord:CLLocationCoordinate2D = mapView.convertPoint(locationInMap, toCoordinateFromView: mapView)
         
-        switch gestureRecognizer.state {
-        case UIGestureRecognizerState.Began:
-            lastAddedPin = Pin(coordinate: coord, context: sharedContext)
-            mapView.addAnnotation(lastAddedPin!)
-        case UIGestureRecognizerState.Changed:
-            lastAddedPin!.willChangeValueForKey("coordinate")
-            lastAddedPin!.coordinate = coord
-            lastAddedPin!.didChangeValueForKey("coordinate")
-        case UIGestureRecognizerState.Ended:
-            getPhotosForPin(lastAddedPin!) { (success, errorString) in
-                self.lastAddedPin!.isDownloading = false
+        if gestureRecognizer.state == .Began {
+            latestPin = Pin(coordinate: coord, context: sharedContext)
+            mapView.addAnnotation(latestPin!)
+        } else
+        if gestureRecognizer.state == .Changed {
+            latestPin!.willChangeValueForKey("coordinate")
+            latestPin!.coordinate = coord
+            latestPin!.didChangeValueForKey("coordinate")
+        } else
+        if gestureRecognizer.state == .Ended {
+            getPhotosForPin(latestPin!) { (success, errorString) in
+                self.latestPin!.isDownloading = false
                 if success == false {
                     self.showAlert("An error occurred", message: errorString!)
                     return
                 }
             }
             CoreDataStackManager.sharedInstance().saveContext()
-        default:
-            return
+
         }
+        else
+        {return}
     }
     
     func deletePin(pin: Pin) {
         mapView.removeAnnotation(pin)
         sharedContext.deleteObject(pin)
         CoreDataStackManager.sharedInstance().saveContext()
+        print("Pin deleted from core data successfully")
     }
     
-    //Editing toggle
-    @IBAction func pinEditAction(sender: AnyObject) {
-        if editPinMode == false {
-            editPinMode = true
-            editButton.title = "Finished"
+    //Pin deletion toggle
+    @IBAction func pinDeletion(sender: AnyObject) {
+        if deletePinMode == false {
+            deletePinMode = true
+            deleteButton.title = "Finished"
             print("Pin deletion mode activated")
         } else {
-            editPinMode = false
-            editButton.title = "Delete Pins"
+            deletePinMode = false
+            deleteButton.title = "Delete Pins"
             print("Pin selection mode activated")
         }
     }
     
     //--------------------------------------------------------------------------------------------------------
-    // MARK - save and load map region
+    // MARK - load the map default region coordinates & save changes
     //--------------------------------------------------------------------------------------------------------
-
     struct mapKeys {
         static let centerLatitude = "cLat"
-        static let centerLongitude = "cLong"
         static let spanLatitude = "sLat"
+        static let centerLongitude = "cLong"
         static let spanLongitude = "sLong"
     }
     
+    func loadMapDefaults() {
+        let fetchRequest = NSFetchRequest(entityName: "MapDefaults")
+        var mapDefaults:[MapDefaults] = []
+        
+        do{
+          let results = try! sharedContext.executeFetchRequest(fetchRequest)
+            mapDefaults = results as! [MapDefaults] }
+          // No need for error handling here as we can be sure it will never fail due to our "is first load" checker in "View Load"
+        
+        if mapDefaults.count > 0 {
+            mapViewDefaults = mapDefaults[0]
+            mapView.region = mapViewDefaults!.region
+        } else {
+            mapViewDefaults = MapDefaults(region: mapView.region, context: sharedContext)
+        }
+    }
+
+    
     // We need to detect any changes in region to store them
     func mapView(mapView: MKMapView, regionDidChangeAnimated animated: Bool) {
-        print("Saving Map Coordinates")
         saveMapRegion()
+        print("Map Region Saved!")
     }
     
     func saveMapRegion() {
-        if mapViewRegion == nil {
-            mapViewRegion = MapDefaults(region: mapView.region, context: sharedContext)
+        if mapViewDefaults == nil {
+            mapViewDefaults = MapDefaults(region: mapView.region, context: sharedContext)
         } else {
-            mapViewRegion!.region = mapView.region
+            mapViewDefaults!.region = mapView.region
         }
         CoreDataStackManager.sharedInstance().saveContext()
     }
     
-    func loadMapRegion() {
-        let fetchRequest = NSFetchRequest(entityName: "MapDefaults")
-        var regions:[MapDefaults] = []
-        do {
-            let results = try sharedContext.executeFetchRequest(fetchRequest)
-            regions = results as! [MapDefaults]
-        } catch let error as NSError {
-            // only map region failed, so failing silent
-            print("An error occured accessing managed object context \(error.localizedDescription)")
-        }
-        if regions.count > 0 {
-            mapViewRegion = regions[0]
-            mapView.region = mapViewRegion!.region
-        } else {
-            mapViewRegion = MapDefaults(region: mapView.region, context: sharedContext)
-        }
-    }
-    
     //--------------------------------------------------------------------------------------------------------
-    // MARK: - Navigation
+    // MARK: - View navigation
     //--------------------------------------------------------------------------------------------------------
     
     // Perform a segue to the Photo View Controller, unless delete toggle is on, in which case, delete.
     
     func mapView(mapView: MKMapView, didSelectAnnotationView view: MKAnnotationView) {
-        print("Pin selected")
         let annotation = view.annotation as! Pin
         selectedPin = annotation
-        if editPinMode == false {
+        if deletePinMode == false {
             performSegueWithIdentifier("OpenPhotoCollection", sender: self)
+            print("Pin selected, loading photo collection view")
         } else {
-            let alert = UIAlertController(title: "Delete Pin", message: "Do you want to remove this pin?", preferredStyle: .Alert)
+            let alert = UIAlertController(title: "Delete Pin", message: "Are you sure? This cannot be undone.", preferredStyle: .Alert)
             alert.addAction(UIAlertAction(title: "Cancel", style: .Default, handler: nil))
-            
-            alert.addAction(UIAlertAction(title: "Ok", style: .Default, handler: { (action: UIAlertAction) in
-                self.selectedPin = nil
+            alert.addAction(UIAlertAction(title: "Do it!", style: .Default, handler: { (action: UIAlertAction) in
+                //Execute the function to remove the pin data from core data
                 self.deletePin(annotation)
+                //Nullify the pin from the map
+                self.selectedPin = nil
+                print("Pin annotation removed from Map View")
             }))
             presentViewController(alert, animated: true, completion: nil)
         }
     }
     
-    // In a storyboard-based application, you will often want to do a little preparation before navigation
     override func prepareForSegue(segue: UIStoryboardSegue, sender: AnyObject?) {
         if segue.identifier == "OpenPhotoCollection" {
             mapView.deselectAnnotation(selectedPin, animated: false)

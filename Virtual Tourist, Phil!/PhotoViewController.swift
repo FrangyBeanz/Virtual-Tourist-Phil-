@@ -128,15 +128,15 @@ class PhotoViewController: MasterViewController, UICollectionViewDataSource, UIC
         
         getPhotosForPin(pin) { (success, errorString) in
             self.pinFinishedDownload()
-            
             if success == false {
-                self.showAlert("An error occurred", message: errorString!)
+                self.showAlert("No photos available at this location", message: errorString!)
                 return
             }
         }
     }
     
     func pinFinishedDownload() {
+        //return a null value until the pin has finished downloading
         if pin.isDownloading == true {
             return
         }
