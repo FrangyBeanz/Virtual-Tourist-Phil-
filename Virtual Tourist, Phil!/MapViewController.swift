@@ -4,9 +4,210 @@
 //
 //  Created by Phillip Hughes on 25/05/2016.
 //  Copyright © 2016 Phillip Hughes. All rights reserved.
+
+//Brief Description: Controller to handle the initial view (in this case, the interactive map). Users can perform a long-press gesture to add pins to the map, to which photos will be assigned from Flickr. Upon tapping a pin, the Photo View controller is called. 
+
 // Pin drop on long touch reference: http://stackoverflow.com/questions/3959994/how-to-add-a-push-pin-to-a-mkmapviewios-when-touching
 // Assistance with NSUserDefaults syntax for bools: http://stackoverflow.com/questions/31070163/need-help-saving-bool-to-nsuserdefaults-and-using-it-in-a-if-statement-using-swi
 //
+
+
+import UIKit
+import MapKit
+import CoreData
+
+class MapViewController: MasterViewController, MKMapViewDelegate {
+    
+    @IBOutlet weak var mapView: MKMapView!
+    @IBOutlet weak var editButton: UIBarButtonItem!
+    
+    var selectedPin:Pin!
+    var lastAddedPin:Pin? = nil
+    var editPinMode = false
+    var mapViewRegion:MapDefaults?
+    
+    override func viewDidLoad() {
+        super.viewDidLoad()
+        
+        // Add a LongPressGestureRecognizer to add a new Pin
+        let longPress = UILongPressGestureRecognizer(target: self, action: "addPin:")
+        longPress.minimumPressDuration = 1.0
+        mapView.addGestureRecognizer(longPress)
+        
+        loadMapRegion()
+        mapView.addAnnotations(fetchAllPins())
+    }
+    
+    // The following code is leveraged from my "On The Map, Phil!" Project. It determines how pins will be renered on the map.
+    func mapView(mapView: MKMapView, viewForAnnotation annotation: MKAnnotation) -> MKAnnotationView? {
+        let reuseId = "Pin"
+        var pinView = mapView.dequeueReusableAnnotationViewWithIdentifier(reuseId) as? MKPinAnnotationView
+        if pinView == nil {
+            pinView = MKPinAnnotationView(annotation: annotation, reuseIdentifier: reuseId)
+            pinView!.canShowCallout = false
+            pinView!.animatesDrop = true
+            pinView!.pinTintColor = UIColor.orangeColor()
+        }
+        else {
+            pinView!.annotation = annotation
+        }
+        return pinView!
+    }
+    
+    // MARK: - Core Data implementation
+    
+    func fetchAllPins() -> [Pin] {
+        let fetchRequest = NSFetchRequest(entityName: "Pin")
+        var pins:[Pin] = []
+        do {
+            let results = try sharedContext.executeFetchRequest(fetchRequest)
+            pins = results as! [Pin]
+        } catch let error as NSError {
+            showAlert("Ooops", message: "Something went wrong when trying to load existing data")
+            print("An error occured accessing managed object context \(error.localizedDescription)")
+        }
+        return pins
+    }
+    
+    
+    // MARK: - Adding, removing and editing Pins
+    func addPin(gestureRecognizer: UIGestureRecognizer) {
+        
+        let locationInMap = gestureRecognizer.locationInView(mapView)
+        let coord:CLLocationCoordinate2D = mapView.convertPoint(locationInMap, toCoordinateFromView: mapView)
+        
+        switch gestureRecognizer.state {
+        case UIGestureRecognizerState.Began:
+            lastAddedPin = Pin(coordinate: coord, context: sharedContext)
+            mapView.addAnnotation(lastAddedPin!)
+        case UIGestureRecognizerState.Changed:
+            lastAddedPin!.willChangeValueForKey("coordinate")
+            lastAddedPin!.coordinate = coord
+            lastAddedPin!.didChangeValueForKey("coordinate")
+        case UIGestureRecognizerState.Ended:
+            getPhotosForPin(lastAddedPin!) { (success, errorString) in
+                self.lastAddedPin!.isDownloading = false
+                if success == false {
+                    self.showAlert("An error occurred", message: errorString!)
+                    return
+                }
+            }
+            CoreDataStackManager.sharedInstance().saveContext()
+        default:
+            return
+            
+        }
+    }
+    
+    func deletePin(pin: Pin) {
+        mapView.removeAnnotation(pin)
+        sharedContext.deleteObject(pin)
+        CoreDataStackManager.sharedInstance().saveContext()
+    }
+
+    
+    //Editing toggle
+    @IBAction func pinEditAction(sender: AnyObject) {
+        if editPinMode == false {
+            editPinMode = true
+            editButton.title = "Finished"
+        } else {
+            editPinMode = false
+            editButton.title = "Delete Pins"
+        }
+    }
+    
+    // Perform a segue to the Photo View Controller, unless delete toggle is on, in which case, delete.
+    
+    func mapView(mapView: MKMapView, didSelectAnnotationView view: MKAnnotationView) {
+        print("Pin selected")
+        let annotation = view.annotation as! Pin
+        selectedPin = annotation
+        if editPinMode == false {
+            performSegueWithIdentifier("OpenPhotoCollection", sender: self)
+        } else {
+            let alert = UIAlertController(title: "Delete Pin", message: "Do you want to remove this pin?", preferredStyle: .Alert)
+            alert.addAction(UIAlertAction(title: "Cancel", style: .Default, handler: nil))
+            
+            alert.addAction(UIAlertAction(title: "Ok", style: .Default, handler: { (action: UIAlertAction) in
+                self.selectedPin = nil
+                self.deletePin(annotation)
+            }))
+            presentViewController(alert, animated: true, completion: nil)
+        }
+    }
+    
+    // We need to detect any changes in region to store them
+    func mapView(mapView: MKMapView, regionDidChangeAnimated animated: Bool) {
+        print("Saving Map Coordinates")
+        saveMapRegion()
+    }
+    
+    
+    // MARK - save and load map region
+    struct mapKeys {
+        static let centerLatitude = "cLat"
+        static let centerLongitude = "cLong"
+        static let spanLatitude = "sLat"
+        static let spanLongitude = "sLong"
+    }
+    
+    
+    func saveMapRegion() {
+        if mapViewRegion == nil {
+            mapViewRegion = MapDefaults(region: mapView.region, context: sharedContext)
+        } else {
+            mapViewRegion!.region = mapView.region
+        }
+        CoreDataStackManager.sharedInstance().saveContext()
+    }
+    
+    func loadMapRegion() {
+        let fetchRequest = NSFetchRequest(entityName: "MapDefaults")
+        var regions:[MapDefaults] = []
+        do {
+            let results = try sharedContext.executeFetchRequest(fetchRequest)
+            regions = results as! [MapDefaults]
+        } catch let error as NSError {
+            // only map region failed, so failing silent
+            print("An error occured accessing managed object context \(error.localizedDescription)")
+        }
+        if regions.count > 0 {
+            mapViewRegion = regions[0]
+            mapView.region = mapViewRegion!.region
+        } else {
+            mapViewRegion = MapDefaults(region: mapView.region, context: sharedContext)
+        }
+    }
+    
+    
+    // MARK: - Navigation
+    
+    // In a storyboard-based application, you will often want to do a little preparation before navigation
+    override func prepareForSegue(segue: UIStoryboardSegue, sender: AnyObject?) {
+        if segue.identifier == "OpenPhotoCollection" {
+            mapView.deselectAnnotation(selectedPin, animated: false)
+            let controller = segue.destinationViewController as! PhotoViewController
+            controller.pin = selectedPin
+        }
+    }
+    
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/*
 
 import UIKit
 import MapKit
@@ -267,4 +468,5 @@ class MapViewController: UIViewController, MKMapViewDelegate, CLLocationManagerD
     
 
 }
+ */
 

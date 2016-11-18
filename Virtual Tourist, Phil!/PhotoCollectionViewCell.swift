@@ -13,19 +13,6 @@ class PhotoCollectionViewCell : UICollectionViewCell {
     
     @IBOutlet weak var photoImageView: UIImageView!
     @IBOutlet weak var activityIndicator: UIActivityIndicatorView!
-    
-    
-    /**
-     MARK: cancels the cells download task by cancelling
-     the NSURLSessionTask
-     **/
-    var urlTask: NSURLSessionTask? {
-        
-        didSet {
-            if let task = oldValue {
-                task.cancel()
-            }
-        }
-    }
-    
+
 }
+    

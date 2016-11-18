@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="10116" systemVersion="15F34" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" initialViewController="d3N-bu-Ift">
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="10116" systemVersion="15G31" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" initialViewController="d3N-bu-Ift">
     <dependencies>
         <deployment identifier="iOS"/>
         <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="10085"/>
@@ -21,6 +21,9 @@
                         <subviews>
                             <mapView clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" mapType="standard" translatesAutoresizingMaskIntoConstraints="NO" id="e0X-Uu-Fn4">
                                 <rect key="frame" x="0.0" y="0.0" width="240" height="128"/>
+                                <connections>
+                                    <outlet property="delegate" destination="6Oj-vn-yBN" id="GDe-Zk-syC"/>
+                                </connections>
                             </mapView>
                         </subviews>
                         <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
@@ -56,14 +59,14 @@
                     <navigationItem key="navigationItem" title="Virtual Tourist" id="fvB-dd-5Pi">
                         <barButtonItem key="rightBarButtonItem" title="Delete Pins" id="Hr7-c0-v6l">
                             <connections>
-                                <action selector="pinEditAction:" destination="6Oj-vn-yBN" id="5lt-bP-0v8"/>
+                                <action selector="pinEditAction:" destination="6Oj-vn-yBN" id="2oh-tN-XLx"/>
                             </connections>
                         </barButtonItem>
                     </navigationItem>
                     <connections>
-                        <outlet property="editButton" destination="Hr7-c0-v6l" id="gcB-Dk-eIc"/>
+                        <outlet property="editButton" destination="Hr7-c0-v6l" id="SMa-MG-jAW"/>
                         <outlet property="mapView" destination="e0X-Uu-Fn4" id="rYT-bm-8DH"/>
-                        <segue destination="BRd-yT-nMS" kind="show" identifier="OpenPhotoCollection" id="GRl-XL-drh"/>
+                        <segue destination="BRd-yT-nMS" kind="showDetail" identifier="OpenPhotoCollection" action="showViewController:sender:" id="GRl-XL-drh"/>
                     </connections>
                 </viewController>
                 <view contentMode="scaleToFill" id="0Ce-eO-6Zx">
@@ -72,13 +75,9 @@
                     <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
                 </view>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="5Rd-0s-16s" userLabel="First Responder" sceneMemberID="firstResponder"/>
-                <pongPressGestureRecognizer allowableMovement="10" minimumPressDuration="0.5" id="YRm-4W-7xI">
-                    <connections>
-                        <action selector="LongTouch:getstureRecognizer:" destination="6Oj-vn-yBN" id="48s-wv-GTi"/>
-                    </connections>
-                </pongPressGestureRecognizer>
+                <pongPressGestureRecognizer allowableMovement="10" minimumPressDuration="0.5" id="YRm-4W-7xI"/>
             </objects>
-            <point key="canvasLocation" x="-1159.5" y="293"/>
+            <point key="canvasLocation" x="896" y="1581"/>
         </scene>
         <!--PhotoViewController-->
         <scene sceneID="tqr-p6-Qxn">
@@ -111,71 +110,63 @@
                             <toolbar opaque="NO" clearsContextBeforeDrawing="NO" contentMode="scaleToFill" barStyle="black" translatesAutoresizingMaskIntoConstraints="NO" id="51q-QO-HFN">
                                 <rect key="frame" x="0.0" y="0.0" width="320" height="44"/>
                                 <items>
-                                    <barButtonItem title="New Collection" width="387" id="6mH-pa-8Gl"/>
+                                    <barButtonItem title="New Collection" width="387" id="6mH-pa-8Gl">
+                                        <connections>
+                                            <action selector="newCollectionButtonTouch:" destination="BRd-yT-nMS" id="oyr-m9-er8"/>
+                                        </connections>
+                                    </barButtonItem>
                                 </items>
                             </toolbar>
-                            <collectionView clipsSubviews="YES" multipleTouchEnabled="YES" alpha="0.75" contentMode="scaleToFill" dataMode="prototypes" translatesAutoresizingMaskIntoConstraints="NO" id="8zh-kb-lcB">
-                                <rect key="frame" x="0.0" y="0.0" width="240" height="128"/>
+                            <collectionView clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleAspectFill" indicatorStyle="black" dataMode="prototypes" translatesAutoresizingMaskIntoConstraints="NO" id="8zh-kb-lcB">
+                                <rect key="frame" x="0.0" y="0.0" width="0.0" height="128"/>
                                 <color key="backgroundColor" red="0.0" green="0.0" blue="0.0" alpha="1" colorSpace="calibratedRGB"/>
+                                <inset key="scrollIndicatorInsets" minX="0.0" minY="10" maxX="0.0" maxY="10"/>
                                 <collectionViewFlowLayout key="collectionViewLayout" minimumLineSpacing="10" minimumInteritemSpacing="10" id="B6N-4u-eor">
                                     <size key="itemSize" width="106" height="100"/>
                                     <size key="headerReferenceSize" width="0.0" height="0.0"/>
                                     <size key="footerReferenceSize" width="0.0" height="0.0"/>
-                                    <inset key="sectionInset" minX="0.0" minY="0.0" maxX="0.0" maxY="0.0"/>
+                                    <inset key="sectionInset" minX="5" minY="0.0" maxX="5" maxY="0.0"/>
                                 </collectionViewFlowLayout>
                                 <cells>
-                                    <collectionViewCell opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" reuseIdentifier="PhotoCollectionViewCell" id="yTo-HF-zKD" userLabel="PhotoCollectionViewCell" customClass="PhotoCollectionViewCell" customModule="Virtual_Tourist__Phil_" customModuleProvider="target">
+                                    <collectionViewCell opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" tag="1" contentMode="scaleAspectFill" reuseIdentifier="PhotoCollectionViewCell" id="yTo-HF-zKD" userLabel="PhotoCollectionViewCell" customClass="PhotoCollectionViewCell" customModule="Virtual_Tourist__Phil_" customModuleProvider="target">
                                         <rect key="frame" x="0.0" y="0.0" width="50" height="50"/>
                                         <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
                                         <view key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center">
                                             <rect key="frame" x="0.0" y="0.0" width="50" height="50"/>
                                             <autoresizingMask key="autoresizingMask"/>
                                             <subviews>
-                                                <imageView alpha="0.5" contentMode="scaleToFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" translatesAutoresizingMaskIntoConstraints="NO" id="FQR-Ss-oS8">
-                                                    <rect key="frame" x="0.0" y="0.0" width="240" height="128"/>
-                                                    <color key="backgroundColor" red="1" green="0.5" blue="0.0" alpha="1" colorSpace="calibratedRGB"/>
-                                                </imageView>
-                                                <activityIndicatorView opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="750" verticalHuggingPriority="750" fixedFrame="YES" style="gray" translatesAutoresizingMaskIntoConstraints="NO" id="drH-g2-qea" userLabel="activityIndicator">
+                                                <activityIndicatorView opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="1" verticalHuggingPriority="1" horizontalCompressionResistancePriority="1" verticalCompressionResistancePriority="1" fixedFrame="YES" style="gray" translatesAutoresizingMaskIntoConstraints="NO" id="drH-g2-qea">
                                                     <rect key="frame" x="15" y="15" width="20" height="20"/>
+                                                    <edgeInsets key="layoutMargins" top="8" left="8" bottom="8" right="8"/>
                                                     <color key="color" red="1" green="0.50196081400000003" blue="0.0" alpha="1" colorSpace="calibratedRGB"/>
                                                 </activityIndicatorView>
+                                                <imageView opaque="NO" contentMode="scaleAspectFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" restorationIdentifier="PhotoCell" translatesAutoresizingMaskIntoConstraints="NO" id="FQR-Ss-oS8">
+                                                    <rect key="frame" x="0.0" y="0.0" width="240" height="128"/>
+                                                    <color key="tintColor" white="0.0" alpha="1" colorSpace="calibratedWhite"/>
+                                                </imageView>
                                             </subviews>
                                             <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="calibratedWhite"/>
                                         </view>
-                                        <constraints>
-                                            <constraint firstItem="FQR-Ss-oS8" firstAttribute="leading" secondItem="yTo-HF-zKD" secondAttribute="leading" id="EEn-7f-kAU"/>
-                                            <constraint firstAttribute="trailing" secondItem="FQR-Ss-oS8" secondAttribute="trailing" id="LyD-el-yda"/>
-                                            <constraint firstAttribute="bottomMargin" secondItem="FQR-Ss-oS8" secondAttribute="bottom" constant="-12" id="PuC-IQ-93c"/>
-                                            <constraint firstItem="FQR-Ss-oS8" firstAttribute="top" secondItem="yTo-HF-zKD" secondAttribute="top" id="jIj-lt-Ah7"/>
-                                        </constraints>
                                         <variation key="default">
                                             <mask key="subviews">
                                                 <exclude reference="FQR-Ss-oS8"/>
-                                            </mask>
-                                            <mask key="constraints">
-                                                <exclude reference="EEn-7f-kAU"/>
-                                                <exclude reference="LyD-el-yda"/>
-                                                <exclude reference="PuC-IQ-93c"/>
-                                                <exclude reference="jIj-lt-Ah7"/>
                                             </mask>
                                         </variation>
                                         <variation key="widthClass=compact">
                                             <mask key="subviews">
                                                 <include reference="FQR-Ss-oS8"/>
                                             </mask>
-                                            <mask key="constraints">
-                                                <include reference="EEn-7f-kAU"/>
-                                                <include reference="LyD-el-yda"/>
-                                                <include reference="PuC-IQ-93c"/>
-                                                <include reference="jIj-lt-Ah7"/>
-                                            </mask>
                                         </variation>
                                         <connections>
                                             <outlet property="activityIndicator" destination="drH-g2-qea" id="LYg-Ri-Oqf"/>
-                                            <outlet property="photoImageView" destination="FQR-Ss-oS8" id="DAl-lB-GCx"/>
+                                            <outlet property="photoImageView" destination="FQR-Ss-oS8" id="kvI-jy-WJQ"/>
                                         </connections>
                                     </collectionViewCell>
                                 </cells>
+                                <connections>
+                                    <outlet property="dataSource" destination="BRd-yT-nMS" id="nDN-dK-8jE"/>
+                                    <outlet property="delegate" destination="BRd-yT-nMS" id="2x0-Pr-Yvm"/>
+                                </connections>
                             </collectionView>
                         </subviews>
                         <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
@@ -228,14 +219,14 @@
                         <barButtonItem key="backBarButtonItem" title="Ok" id="AyL-sb-Rwc"/>
                     </navigationItem>
                     <connections>
-                        <outlet property="PhotoCollection" destination="8zh-kb-lcB" id="qId-8z-2B7"/>
+                        <outlet property="collectionView" destination="8zh-kb-lcB" id="rXu-Mf-6vL"/>
                         <outlet property="mapView" destination="oGq-Lv-HA9" id="jUV-ns-sea"/>
                         <outlet property="newCollectionButton" destination="6mH-pa-8Gl" id="zTv-ml-QO2"/>
                     </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="0H5-eH-ddW" userLabel="First Responder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="-364.5" y="293"/>
+            <point key="canvasLocation" x="1691" y="1581"/>
         </scene>
         <!--Navigation Controller-->
         <scene sceneID="120-2A-vpy">
@@ -261,7 +252,7 @@
                     </items>
                 </tabBar>
             </objects>
-            <point key="canvasLocation" x="-1948.5" y="293"/>
+            <point key="canvasLocation" x="107" y="1581"/>
         </scene>
     </scenes>
     <color key="tintColor" red="1" green="0.5" blue="0.0" alpha="1" colorSpace="calibratedRGB"/>

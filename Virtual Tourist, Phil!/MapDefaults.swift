@@ -10,6 +10,9 @@ import Foundation
 import CoreData
 import MapKit
 
+@objc(MapDefaults)
+
+
 class MapDefaults: NSManagedObject {
     
     @NSManaged var cLat: Double
@@ -38,8 +41,8 @@ class MapDefaults: NSManagedObject {
             sLong = newValue.span.longitudeDelta
         }
         get {
-            let center = CLLocationCoordinate2DMake(cLat, cLong); print("Got coordinates")
-            let span = MKCoordinateSpanMake(sLat, sLong); print("Got Spans")
+            let center = CLLocationCoordinate2DMake(cLat, cLong); print("Got coordinates from core data!")
+            let span = MKCoordinateSpanMake(sLat, sLong); print("Got spans from core data!")
             return MKCoordinateRegionMake(center, span)
         }
     }
