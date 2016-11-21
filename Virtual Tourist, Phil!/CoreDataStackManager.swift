@@ -81,7 +81,7 @@ class CoreDataStackManager {
         let coordinator: NSPersistentStoreCoordinator? = NSPersistentStoreCoordinator(managedObjectModel: self.managedObjectModel)
         let url = self.applicationDocumentsDirectory.URLByAppendingPathComponent(SQLITE_FILE_NAME)
         
-        print("sqlite path: \(url.path!)")
+        print("sqlite path: \(url!.path!)")
         
         var failureReason = "There was an error creating or loading the application's saved data."
         do {
